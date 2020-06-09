@@ -1,0 +1,155 @@
+html(lang="en")
+  head
+    script.
+      setTimeout("location.reload(true);", 60000);
+    style.
+      body {
+        background-color: #0f1117;
+        color: #ffffff;
+        padding: 1em;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica;
+      }
+      .green {
+        color: #59FF33;
+      }
+      .red {
+        color: #8B0000;
+      }
+      .yellow {
+        color: #F0BC18;
+      }
+      .historical-ok {
+        color: #59FF33;
+        font-size: 40px;
+        display: inline-block;
+      }
+      .historical-ok:hover {
+        color: #cdffc1;
+      }
+      .historical-down {
+        color: #8B0000;
+        font-size: 40px;
+        display: inline-block;
+      }
+      .historical-down:hover {
+        color: #ff3359;
+      }
+      .small {
+        font-size: 12px;
+      }
+      .medium {
+        font-size: 16px;
+      }
+      .large {
+        font-size: 24px;
+      }
+      .end {
+        text-align: right;
+        flex-grow: 1;
+        align-self: flex-end;
+      }
+      .full {
+        display: flex;
+      }
+      .historical {
+        display: inline-block;
+      }
+      .tooltip {
+        position: relative;
+        cursor: pointer;
+      }
+      .tooltiptext {
+        visibility: hidden;
+        font-size: 12px;
+        width: 155px;
+        background-color: #222222;
+        color: #fff;
+        text-align: center;
+        padding: 5px 5px;
+        border-radius: 6px;
+        position: absolute;
+        top: 45px;
+        z-index: 1;
+      }
+      .tooltip:hover .tooltiptext {
+        visibility: visible;
+      }
+  body
+    h1 Stacks Blockchain Status
+    h2 Testnet Status:
+    h3 Master Node: 
+      if(!data.masterNodePings) 
+        span.yellow Checking status...
+      else 
+        if(data.masterNodePings[0].status === 1) 
+          span.green Online
+        else 
+          span.red Offline
+        div.small Last checked: #{fromNow(data.masterNodePings[0].timestamp)}
+        div.medium.historical
+          div
+            for ping in data.masterNodePings
+              if(ping.status === 1)
+                div.historical-ok.tooltip I
+                  span.tooltiptext #{formatTimestamp(ping.timestamp)}
+              else
+                div.historical-down.tooltip I
+                  span.tooltiptext #{formatTimestamp(ping.timestamp)}
+            div.full 
+              div.small Now&nbsp;&nbsp;
+              div.small.end 90 minutes ago
+    h3 Blockchain API (Sidecar): 
+      if(!data.sidecarPings) 
+        span.yellow Checking status...
+      else 
+        if(data.sidecarPings[0].status === 1) 
+          span.green Online
+        else 
+          span.red Offline
+        div.small Last checked: #{fromNow(data.sidecarPings[0].timestamp)}
+        div.medium.historical
+          div
+            for ping in data.sidecarPings
+              if(ping.status === 1)
+                div.historical-ok.tooltip I
+                  span.tooltiptext #{formatTimestamp(ping.timestamp)}
+              else
+                div.historical-down.tooltip I
+                  span.tooltiptext #{formatTimestamp(ping.timestamp)}
+            div.full 
+              div.small Now&nbsp;&nbsp;
+              div.small.end 90 minutes ago
+    h3 Explorer: 
+      if(!data.explorerPings) 
+        span.yellow Checking status...
+      else 
+        if(data.explorerPings[0].status === 1) 
+          span.green Online
+        else 
+          span.red Offline
+        div.small Last checked: #{fromNow(data.explorerPings[0].timestamp)}
+        div.medium.historical
+          div
+            for ping in data.explorerPings
+              if(ping.status === 1)
+                div.historical-ok.tooltip I
+                  span.tooltiptext #{formatTimestamp(ping.timestamp)}
+              else
+                div.historical-down.tooltip I
+                  span.tooltiptext #{formatTimestamp(ping.timestamp)}
+            div.full 
+              div.small Now&nbsp;&nbsp;
+              div.small.end 90 minutes ago
+    div.large Last Seen Stacks Chain Tip Height: 
+      if (data.blockProgressStatus === 2)
+        span.red #{data.lastStacksChainTipHeight}
+      else if (data.blockProgressStatus === 1)
+        span.yellow #{data.lastStacksChainTipHeight}
+      else
+        span.green #{data.lastStacksChainTipHeight}
+    if (data.blockProgressStatus === 2)
+      div.medium.red #{fromNow(data.lastStacksChainTipHeightTime)}
+    else if (data.blockProgressStatus === 1)
+      div.small.yellow #{fromNow(data.lastStacksChainTipHeightTime)}
+    else
+      div.small.green #{fromNow(data.lastStacksChainTipHeightTime)}
