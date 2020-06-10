@@ -21,6 +21,7 @@
   "dependencies": {
     "@blockstack/stacks-transactions": "^0.4.6",
     "abort-controller": "^3.0.0",
+    "bn.js": "^5.1.2",
     "express": "^4.17.1",
     "moment": "^2.26.0",
     "node-cron": "^2.0.3",

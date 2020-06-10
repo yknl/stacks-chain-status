@@ -4,6 +4,17 @@ const app = express();
 const port = 3000;
 const { promisify } = require('util');
 
+const { 
+  masterNodeKey,
+  sidecarKey,
+  explorerKey,
+  lastStacksChainTipHeightKey,
+  lastStacksChainTipHeightTimeKey,
+  lastChainResetKey,
+  reseedingStepKey,
+  ReseedingSteps,
+} = require('./constants')
+
 const cron = require('node-cron');
 const moment = require('moment');
 app.locals.moment = moment;
@@ -22,17 +33,10 @@ client.on("error", function(error) {
 });
 
 const status = require('./status');
-cron.schedule("* * * * *", () => {
+status(client);
+cron.schedule("*/5 * * * *", () => {
   status(client);
 });
-
-const { 
-  masterNodeKey,
-  sidecarKey,
-  explorerKey,
-  lastStacksChainTipHeightKey,
-  lastStacksChainTipHeightTimeKey,
-} = require('./constants')
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -64,6 +68,7 @@ app.get('/', (req, res) => {
 
   const lastStacksChainTipHeightPromise = redisGetAsync(lastStacksChainTipHeightKey);
   const lastStacksChainTipHeightTimePromise = redisGetAsync(lastStacksChainTipHeightTimeKey);
+  const lastChainReset = redisGetAsync(lastChainResetKey);
 
   const promises = [
     masterNodePromise,
@@ -71,6 +76,7 @@ app.get('/', (req, res) => {
     explorerPromise,
     lastStacksChainTipHeightPromise,
     lastStacksChainTipHeightTimePromise,
+    lastChainReset,
   ];
 
   return Promise.all(promises)
@@ -80,6 +86,7 @@ app.get('/', (req, res) => {
       explorerPings,
       lastStacksChainTipHeight,
       lastStacksChainTipHeightTime,
+      lastChainReset,
     ]) => {
       const minutesSinceLastStacksBlock = moment.duration(moment().diff(moment.unix(lastStacksChainTipHeightTime))).asMinutes();
       const blockProgressStatus = minutesSinceLastStacksBlock > 30 ? 2 : minutesSinceLastStacksBlock > 10 ? 1 : 0
@@ -91,6 +98,7 @@ app.get('/', (req, res) => {
         lastStacksChainTipHeight,
         lastStacksChainTipHeightTime,
         blockProgressStatus,
+        lastChainReset,
       };
       res.render('index', { data });
     })

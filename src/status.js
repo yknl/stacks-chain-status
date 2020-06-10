@@ -3,15 +3,13 @@ const AbortController = require('abort-controller');
 const moment = require('moment');
 const { promisify } = require('util');
 
-const nodeInfoURL = 'http://testnet-master.blockstack.org:20443/v2/info';
-const neonNodeInfoURL = 'http://neon.blockstack.org/v2/info';
-const sidecarURL = 'https://sidecar.staging.blockstack.xyz/v2/info';
-const explorerURL = 'https://testnet-explorer.now.sh/';
-
-const pingTimeout = 5000;
-const historicalDataMax = 90;
+const historicalDataMax = 72;
 
 const { 
+  pingTimeout,
+  nodeInfoURL,
+  sidecarURL,
+  explorerURL,
   masterNodeKey,
   sidecarKey,
   explorerKey,
@@ -130,7 +128,7 @@ module.exports = function status(client) {
     ]) => {
 
       if (masterNodeResponse) {
-        console.log(masterNodeResponse);
+        // console.log(masterNodeResponse);
         const newStacksChainTipHeight = masterNodeResponse.stacks_tip_height;
 
         console.log(`Last chain tip: ${lastStacksChainTipHeight} new chain tip: ${newStacksChainTipHeight}`);
@@ -138,7 +136,7 @@ module.exports = function status(client) {
           console.log(`stacks tip height changed from ${lastStacksChainTipHeight} to ${newStacksChainTipHeight}`);
 
           if (newStacksChainTipHeight < lastStacksChainTipHeight) {
-            console.log('chain reset detected');
+            console.log('possible chain reset detected');
             if (masterNodeResponse) {
               console.log('re-seeding transactions');
               try {
@@ -148,6 +146,7 @@ module.exports = function status(client) {
               }
               client.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
               client.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
+              client.set(lastChainResetKey, moment().unix().toString());
             }
           } else {
             client.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);

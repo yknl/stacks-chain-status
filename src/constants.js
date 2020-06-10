@@ -1,4 +1,10 @@
 module.exports = {
+  pingTimeout: 5000,
+  nodeInfoURL: 'http://testnet-master.blockstack.org:20443/v2/info',
+  neonNodeInfoURL: 'http://neon.blockstack.org/v2/info',
+  sidecarURL: 'https://sidecar.staging.blockstack.xyz/v2/info',
+  explorerURL: 'https://testnet-explorer.now.sh/',
+  faucetURL: 'https://sidecar.staging.blockstack.xyz/sidecar/v1/faucets/stx?address=',
   masterNodeKey: 'master_node_ping',
   sidecarKey: 'sidecar_ping',
   explorerKey: 'explorer_ping',
@@ -9,5 +15,15 @@ module.exports = {
   lastChainResetKey: 'last_chain_reset',
   reseedingStepKey: 'reseeding_step',
   reseedNextBlockKey: 'reseed_next_block',
-  reseedTries: 'reseed_tries',
+  reseedTryCount: 'reseed_try_count',
+  ReseedingSteps: {
+    NotReseeding: 0,
+    Setup: 1,
+    TokenTransfer: 2,
+    ContractDeploy: 3,
+    ContractCall: 4,
+  },
+  seededTokenTransferTxKey: 'seeded_token_transfer_tx',
+  seededContractDeployTxKey: 'seeded_contract_deploy_tx',
+  seededContractCallTxKey: 'seeded_contract_call_tx',
 }

@@ -42,6 +42,7 @@ html(lang="en")
       }
       .large {
         font-size: 24px;
+        padding-top: 10px;
       }
       .end {
         text-align: right;
@@ -97,7 +98,7 @@ html(lang="en")
                   span.tooltiptext #{formatTimestamp(ping.timestamp)}
             div.full 
               div.small Now&nbsp;&nbsp;
-              div.small.end 90 minutes ago
+              div.small.end 6 hours ago
     h3 Blockchain API (Sidecar): 
       if(!data.sidecarPings) 
         span.yellow Checking status...
@@ -118,7 +119,7 @@ html(lang="en")
                   span.tooltiptext #{formatTimestamp(ping.timestamp)}
             div.full 
               div.small Now&nbsp;&nbsp;
-              div.small.end 90 minutes ago
+              div.small.end 6 hours ago
     h3 Explorer: 
       if(!data.explorerPings) 
         span.yellow Checking status...
@@ -139,7 +140,7 @@ html(lang="en")
                   span.tooltiptext #{formatTimestamp(ping.timestamp)}
             div.full 
               div.small Now&nbsp;&nbsp;
-              div.small.end 90 minutes ago
+              div.small.end 6 hours ago
     div.large Last Seen Stacks Chain Tip Height: 
       if (data.blockProgressStatus === 2)
         span.red #{data.lastStacksChainTipHeight}
@@ -153,3 +154,8 @@ html(lang="en")
       div.small.yellow #{fromNow(data.lastStacksChainTipHeightTime)}
     else
       div.small.green #{fromNow(data.lastStacksChainTipHeightTime)}
+    div.large Last Chain Reset: 
+      if (data.lastChainReset)
+        span #{fromNow(data.lastChainReset)}
+      else 
+        span Unknown
