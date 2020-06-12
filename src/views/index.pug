@@ -75,6 +75,19 @@ html(lang="en")
       .tooltip:hover .tooltiptext {
         visibility: visible;
       }
+      table, th, td {
+        border: 1px solid #fff;
+        border-collapse: collapse;
+        padding: 8px;
+        text-align: left;
+        margin-top: 15px;
+      }
+      a:link, a:visited {
+        color: #bbb;
+      }
+      a:hover {
+        color: #fff;
+      }
   body
     h1 Stacks Blockchain Status
     h2 Testnet Status:
@@ -87,6 +100,7 @@ html(lang="en")
         else 
           span.red Offline
         div.small Last checked: #{fromNow(data.masterNodePings[0].timestamp)}
+        - var oldestMasterNodePing = data.masterNodePings[data.masterNodePings.length - 1];
         div.medium.historical
           div
             for ping in data.masterNodePings
@@ -98,7 +112,7 @@ html(lang="en")
                   span.tooltiptext #{formatTimestamp(ping.timestamp)}
             div.full 
               div.small Now&nbsp;&nbsp;
-              div.small.end 6 hours ago
+              div.small.end #{fromNow(oldestMasterNodePing.timestamp)}
     h3 Blockchain API (Sidecar): 
       if(!data.sidecarPings) 
         span.yellow Checking status...
@@ -108,6 +122,7 @@ html(lang="en")
         else 
           span.red Offline
         div.small Last checked: #{fromNow(data.sidecarPings[0].timestamp)}
+        - var oldestSidecarPing = data.sidecarPings[data.sidecarPings.length - 1];
         div.medium.historical
           div
             for ping in data.sidecarPings
@@ -119,7 +134,7 @@ html(lang="en")
                   span.tooltiptext #{formatTimestamp(ping.timestamp)}
             div.full 
               div.small Now&nbsp;&nbsp;
-              div.small.end 6 hours ago
+              div.small.end #{fromNow(oldestSidecarPing.timestamp)}
     h3 Explorer: 
       if(!data.explorerPings) 
         span.yellow Checking status...
@@ -129,6 +144,7 @@ html(lang="en")
         else 
           span.red Offline
         div.small Last checked: #{fromNow(data.explorerPings[0].timestamp)}
+        - var oldestExplorerPing = data.explorerPings[data.explorerPings.length - 1];
         div.medium.historical
           div
             for ping in data.explorerPings
@@ -140,7 +156,7 @@ html(lang="en")
                   span.tooltiptext #{formatTimestamp(ping.timestamp)}
             div.full 
               div.small Now&nbsp;&nbsp;
-              div.small.end 6 hours ago
+              div.small.end #{fromNow(oldestExplorerPing.timestamp)}
     div.large Last Seen Stacks Chain Tip Height: 
       if (data.blockProgressStatus === 2)
         span.red #{data.lastStacksChainTipHeight}
@@ -159,3 +175,72 @@ html(lang="en")
         span #{fromNow(data.lastChainReset)}
       else 
         span Unknown
+
+    h2 Transactions:
+      if (data.reseedingStep != 0)
+        div.medium Currently reseeding transactions... 
+          if (data.reseedingStep == 1) 
+            span calling faucet
+          if (data.reseedingStep == 2)
+            span transferring tokens
+          if (data.reseedingStep == 3)
+            span deploying contract
+          if (data.reseedingStep == 4)
+            span calling contract function
+
+      if (data.seededFaucetTx.txid || data.seededTokenTransferTx.txid || data.seededContractDeployTx.txid || data.seededContractCallTx.txid)
+        table
+          tr
+            th Transaction Type
+            th TXID (Explorer Link)
+            th Broadcasted
+            th Status
+          if (data.seededFaucetTx.txid)
+            tr
+              td Faucet Transfer
+              td
+                a.small(href=getExplorerTxURL(data.seededFaucetTx.txid), target="_blank") #{data.seededFaucetTx.txid}
+              td #{fromNow(data.seededFaucetTx.broadcasted)}
+              td
+                if (data.seededFaucetTx.status === 'success') 
+                  span.green #{data.seededFaucetTx.status}
+                else 
+                  span #{data.seededFaucetTx.status}
+          if (data.seededTokenTransferTx.txid)
+            tr
+              td Token Transfer
+              td
+                a.small(href=getExplorerTxURL(data.seededTokenTransferTx.txid), target="_blank") #{data.seededTokenTransferTx.txid}
+              td #{fromNow(data.seededTokenTransferTx.broadcasted)}
+              td 
+                if (data.seededTokenTransferTx.status === 'success') 
+                  span.green #{data.seededTokenTransferTx.status}
+                else 
+                  span #{data.seededTokenTransferTx.status}
+          if (data.seededContractDeployTx.txid)
+            tr
+              td Contract Deploy
+              td
+                a.small(href=getExplorerTxURL(data.seededContractDeployTx.txid) target="_blank") #{data.seededContractDeployTx.txid}
+              td #{fromNow(data.seededContractDeployTx.broadcasted)}
+              td 
+                if (data.seededContractDeployTx.status === 'success') 
+                  span.green #{data.seededContractDeployTx.status}
+                else 
+                  span #{data.seededContractDeployTx.status}
+          if (data.seededContractCallTx.txid)
+            tr
+              td Contract Call
+              td
+                a.small(href=getExplorerTxURL(data.seededContractCallTx.txid) target="_blank") #{data.seededContractCallTx.txid}
+              td #{fromNow(data.seededContractCallTx.broadcasted)}
+              td 
+                if (data.seededContractCallTx.status === 'success') 
+                  span.green #{data.seededContractCallTx.status}
+                else 
+                  span #{data.seededContractCallTx.status}
+      if (data.reseedAbortError)
+        div.medium Transaction seeding aborted due to: 
+          p #{data.reseedAbortError}
+    span.medium Data also available in  
+      a(href='/json') JSON

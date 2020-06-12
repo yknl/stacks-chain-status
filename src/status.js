@@ -9,30 +9,39 @@ const {
   pingTimeout,
   nodeInfoURL,
   sidecarURL,
+  sidecarTxURL,
   explorerURL,
   masterNodeKey,
   sidecarKey,
   explorerKey,
   lastStacksChainTipHeightKey,
   lastStacksChainTipHeightTimeKey,
-  lastBurnBlockHeightKey,
-  lastBurnBlockHeightTimeKey,
   lastChainResetKey,
+  ReseedingSteps,
+  reseedingStepKey,
+  seededFaucetTxKey,
+  seededTokenTransferTxKey,
+  seededContractDeployTxKey,
+  seededContractCallTxKey,
+  seededFaucetTxStatusKey,
+  seededTokenTransferTxStatusKey,
+  seededContractDeployTxStatusKey,
+  seededContractCallTxStatusKey,
 } = require('./constants')
 
-function getAndUpdateStatus(url, redisKey, client, data, json = true) {
+function getAndUpdateStatus(url, redisKey, redisClient, data, json = false) {
   return getStatus(url, json)
     .then((response) => {
       if (!response) {
-        updateHistorical(client, redisKey, data, 0);
+        updateHistorical(redisClient, redisKey, data, 0);
         return false;
       } else {
-        updateHistorical(client, redisKey, data, 1);
+        updateHistorical(redisClient, redisKey, data, 1);
         return response
       }
     })
     .catch((error) => {
-      updateHistorical(client, redisKey, data, 0);
+      updateHistorical(redisClient, redisKey, data, 0);
       return false;
     });
 }
@@ -48,6 +57,16 @@ function getStatus(url, json) {
       return json ? res.json() : res.status;
     })
     .then((data) => {
+      if (json.property) {
+        if (!data.hasOwnProperty(json.property)) {
+          return Promise.reject('Required status check property not found in response');
+        } else {
+          if (json.value && data[json.property] != json.value) {
+            return Promise.reject('Stacks check property value incorrect');
+          }
+        }
+      }
+
       console.log(`ok ${url}`);
       return data;
     })
@@ -64,7 +83,7 @@ function getStatus(url, json) {
     });
 }
 
-function updateHistorical(client, key, data, status) {
+function updateHistorical(redisClient, key, data, status) {
   const pingResult = { timestamp: moment().unix(), status };
   if(!data) {
     data = [];
@@ -73,12 +92,11 @@ function updateHistorical(client, key, data, status) {
   if (data.length > historicalDataMax) {
     data = data.slice(0, historicalDataMax);
   }
-  client.set(key, JSON.stringify(data));
+  redisClient.set(key, JSON.stringify(data));
 }
 
-module.exports = function status(client) {
-  console.log("Running status check");
-  const redisGetAsync = promisify(client.get).bind(client);
+module.exports = function status(redisClient) {
+  const redisGetAsync = promisify(redisClient.get).bind(redisClient);
 
   const masterNodePromise = redisGetAsync(masterNodeKey).then((value) => {
     if (value) {
@@ -87,7 +105,7 @@ module.exports = function status(client) {
       return null;
     }
   }).then(data => {
-    return getAndUpdateStatus(nodeInfoURL, masterNodeKey, client, data);
+    return getAndUpdateStatus(nodeInfoURL, masterNodeKey, redisClient, data, { property: "stacks_tip_height" });
   });
 
   const sidecarPromise = redisGetAsync(sidecarKey).then((value) => {
@@ -97,7 +115,7 @@ module.exports = function status(client) {
       return null;
     }
   }).then(data => {
-    return getAndUpdateStatus(sidecarURL, sidecarKey, client, data);
+    return getAndUpdateStatus(sidecarURL, sidecarKey, redisClient, data, { property: "status", value: "ready" });
   });
 
   const explorerPromise = redisGetAsync(explorerKey).then((value) => {
@@ -107,7 +125,83 @@ module.exports = function status(client) {
       return null;
     }
   }).then(data => {
-    return getAndUpdateStatus(explorerURL, explorerKey, client, data, false);
+    return getAndUpdateStatus(explorerURL, explorerKey, redisClient, data);
+  });
+
+  const faucetTxStatusPromise = redisGetAsync(seededFaucetTxKey).then((txid) => {
+    if (!txid) return false;
+    const url = `${sidecarTxURL}/0x${txid}`;
+    return getStatus(url, { property: "tx_status" })
+      .then((response) => {
+        if (!response) {
+          redisClient.set(seededFaucetTxStatusKey, "Not found");
+          return false;
+        } else {
+          redisClient.set(seededFaucetTxStatusKey, response.tx_status);
+          return response
+        }
+      })
+      .catch((error) => {
+        redisClient.set(seededFaucetTxStatusKey, "Not found");
+        return false;
+      });
+  });
+
+  const tokenTransferTxStatusPromise = redisGetAsync(seededTokenTransferTxKey).then((txid) => {
+    if (!txid) return false;
+    const url = `${sidecarTxURL}/0x${txid}`;
+    return getStatus(url, { property: "tx_status" })
+      .then((response) => {
+        if (!response) {
+          redisClient.set(seededTokenTransferTxStatusKey, "Not found");
+          return false;
+        } else {
+          redisClient.set(seededTokenTransferTxStatusKey, response.tx_status);
+          return response
+        }
+      })
+      .catch((error) => {
+        redisClient.set(seededTokenTransferTxStatusKey, "Not found");
+        return false;
+      });
+  });
+
+  const contractDeployTxStatusPromise = redisGetAsync(seededContractDeployTxKey).then((txid) => {
+    if (!txid) return false;
+    const url = `${sidecarTxURL}/0x${txid}`;
+    return getStatus(url, { property: "tx_status" })
+      .then((response) => {
+        if (!response) {
+          redisClient.set(seededContractDeployTxStatusKey, "Not found");
+          return false;
+        } else {
+          redisClient.set(seededContractDeployTxStatusKey, response.tx_status);
+          return response
+        }
+      })
+      .catch((error) => {
+        redisClient.set(seededContractDeployTxStatusKey, "Not found");
+        return false;
+      });
+  });
+
+  const contractCallTxStatusPromise = redisGetAsync(seededContractCallTxKey).then((txid) => {
+    if (!txid) return false;
+    const url = `${sidecarTxURL}/0x${txid}`;
+    return getStatus(url, { property: "tx_status" })
+      .then((response) => {
+        if (!response) {
+          redisClient.set(seededContractCallTxStatusKey, "Not found");
+          return false;
+        } else {
+          redisClient.set(seededContractCallTxStatusKey, response.tx_status);
+          return response
+        }
+      })
+      .catch((error) => {
+        redisClient.set(seededContractCallTxStatusKey, "Not found");
+        return false;
+      });
   });
 
   const lastStacksChainTipHeightPromise = redisGetAsync(lastStacksChainTipHeightKey);
@@ -117,6 +211,10 @@ module.exports = function status(client) {
     sidecarPromise,
     explorerPromise,
     lastStacksChainTipHeightPromise,
+    faucetTxStatusPromise,
+    tokenTransferTxStatusPromise,
+    contractDeployTxStatusPromise,
+    contractCallTxStatusPromise,
   ];
 
   return Promise.all(promises)
@@ -124,33 +222,26 @@ module.exports = function status(client) {
       masterNodeResponse,
       sidecarResponse,
       explorerResponse,
-      lastStacksChainTipHeight
+      lastStacksChainTipHeight,
+      faucetTxStatus,
+      tokenTransferTxStatus,
+      contractDeployTxStatus,
+      contractCallTxStatus,
     ]) => {
 
       if (masterNodeResponse) {
-        // console.log(masterNodeResponse);
         const newStacksChainTipHeight = masterNodeResponse.stacks_tip_height;
-
-        console.log(`Last chain tip: ${lastStacksChainTipHeight} new chain tip: ${newStacksChainTipHeight}`);
         if (newStacksChainTipHeight != lastStacksChainTipHeight) {
-          console.log(`stacks tip height changed from ${lastStacksChainTipHeight} to ${newStacksChainTipHeight}`);
-
-          if (newStacksChainTipHeight < lastStacksChainTipHeight) {
-            console.log('possible chain reset detected');
+          if (newStacksChainTipHeight < parseInt(lastStacksChainTipHeight)) {
             if (masterNodeResponse) {
-              console.log('re-seeding transactions');
-              try {
-                // re-seed transactions
-              } catch(error) {
-                console.log(error);
-              }
-              client.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
-              client.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
-              client.set(lastChainResetKey, moment().unix().toString());
+              redisClient.set(reseedingStepKey, ReseedingSteps.Setup.toString());
+              redisClient.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
+              redisClient.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
+              redisClient.set(lastChainResetKey, moment().unix().toString());
             }
           } else {
-            client.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
-            client.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
+            redisClient.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
+            redisClient.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
           }
 
         }
