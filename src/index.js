@@ -54,8 +54,8 @@ client.on("error", function(error) {
 const cron = require('node-cron');
 
 const statusSchedule = process.env.STATUS_SCHEDULE || '*/5 * * * *';
-const reseedSchedule = process.env.RESEED_SCHEDULE || '* * * *';
-const reseedRunSchedule = process.env.RESEED_RUN_SCHEDULE || '* * * * *';
+const reseedSchedule = process.env.RESEED_SCHEDULE || '*/59 * * * *';
+const reseedRunSchedule = process.env.RESEED_RUN_SCHEDULE || '*/1 * * * *';
 
 
 const status = require('./status');
