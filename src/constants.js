@@ -4,7 +4,7 @@ module.exports = {
   neonNodeInfoURL: 'http://neon.blockstack.org/v2/info',
   sidecarURL: 'https://sidecar.staging.blockstack.xyz/sidecar/v1/status',
   sidecarTxURL: 'https://sidecar.staging.blockstack.xyz/sidecar/v1/tx',
-  explorerURL: 'https://testnet-explorer.now.sh/',
+  explorerURL: 'https://testnet-explorer.blockstack.org/',
   faucetURL: 'https://sidecar.staging.blockstack.xyz/sidecar/v1/faucets/stx?address=',
   masterNodeKey: 'master_node_ping',
   sidecarKey: 'sidecar_ping',
