@@ -33,7 +33,7 @@ const {
 const moment = require('moment');
 app.locals.moment = moment;
 app.locals.formatTimestamp = (timestamp) => 
-  moment.unix(timestamp).format('YYYY/MM/DD, HH:mm:ss')
+  moment.unix(timestamp).format('YYYY/MM/DD, HH:mm:ss Z')
 app.locals.fromNow = (timestamp) => 
   moment.unix(timestamp).fromNow();
 app.locals.getExplorerTxURL = (txid) => 
