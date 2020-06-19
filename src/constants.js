@@ -1,6 +1,6 @@
 module.exports = {
   pingTimeout: 5000,
-  nodeInfoURL: 'http://testnet-master.blockstack.org:20443/v2/info',
+  nodeInfoURL: 'http://testnet-master.blockstack.org:20443/v2/infoa',
   neonNodeInfoURL: 'http://neon.blockstack.org/v2/info',
   sidecarURL: 'https://sidecar.staging.blockstack.xyz/sidecar/v1/status',
   sidecarTxURL: 'https://sidecar.staging.blockstack.xyz/sidecar/v1/tx',
@@ -42,5 +42,7 @@ module.exports = {
   seededTokenTransferTxBroadcastTimeKey: 'seeded_token_transfer_tx_broadcast_time',
   seededContractDeployTxBroadcastTimeKey: 'seeded_contract_deploy_tx_broadcast_time',
   seededContractCallTxBroadcastTimeKey: 'seeded_contract_call_tx_broadcast_time',
-  historicalDataMax: 72
+  historicalDataMax: 72,
+  blockRateYellowCount: 85,
+  blockRateRedCount: 30,
 }

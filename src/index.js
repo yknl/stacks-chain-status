@@ -28,7 +28,9 @@ const {
   seededContractDeployTxBroadcastTimeKey,
   seededContractCallTxBroadcastTimeKey,
   explorerURL,
-  reseedAbortErrorKey
+  reseedAbortErrorKey,
+  blockRateRedCount,
+  blockRateYellowCount,
 } = require('./constants')
 
 const moment = require('moment');
@@ -214,9 +216,9 @@ const getIndexData = () => {
         if (heightDifference > 0 && duration > 0) {
           averageBlockRate = heightDifference / duration.asHours();
           blockRateDuration = duration.asHours();
-          if (averageBlockRate < 30) {
+          if (averageBlockRate < blockRateRedCount) {
             blockRateStatus = 2;
-          } else if (averageBlockRate < 85) {
+          } else if (averageBlockRate < blockRateYellowCount) {
             blockRateStatus = 1;
           }
 
@@ -228,9 +230,9 @@ const getIndexData = () => {
             const approxOneHourHeightDifference = latestBlockHeight - approxOneHourAgoBlockHeight;
             const approxOneHourDuration = moment.duration(moment.unix(latestBlockTimestamp).diff(moment.unix(approxOneHourAgoTimestamp)));
             lastHourAverageBlockRate = approxOneHourHeightDifference / approxOneHourDuration.asHours();
-            if (lastHourAverageBlockRate < 30) {
+            if (lastHourAverageBlockRate < blockRateRedCount) {
               lastHourBlockRateStatus = 2;
-            } else if (averageBlockRate < 85) {
+            } else if (averageBlockRate < blockRateYellowCount) {
               lastHourBlockRateStatus = 1;
             }
           }

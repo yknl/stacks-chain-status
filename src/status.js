@@ -259,6 +259,16 @@ module.exports = function status(redisClient) {
           }
 
         }
+      } else {
+        redisGetAsync(stacksChainTipKey).then((value) => {
+          if (value) {
+            return JSON.parse(value);
+          } else {
+            return null;
+          }
+        }).then((data) => {
+          return updateHistorical(redisClient, stacksChainTipKey, data, lastStacksChainTipHeight);
+        });
       }
 
     });
