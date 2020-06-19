@@ -9,6 +9,7 @@ const {
   masterNodeKey,
   sidecarKey,
   explorerKey,
+  stacksChainTipKey,
   lastStacksChainTipHeightKey,
   lastStacksChainTipHeightTimeKey,
   lastChainResetKey,
@@ -116,6 +117,14 @@ const getIndexData = () => {
     }
   });
 
+  const stacksChainTipPromise = redisGetAsync(stacksChainTipKey).then((value) => {
+    if (value) {
+      return JSON.parse(value);
+    } else {
+      return null;
+    }
+  });
+
   const lastStacksChainTipHeightPromise = redisGetAsync(lastStacksChainTipHeightKey);
   const lastStacksChainTipHeightTimePromise = redisGetAsync(lastStacksChainTipHeightTimeKey);
   const lastChainReset = redisGetAsync(lastChainResetKey);
@@ -140,6 +149,7 @@ const getIndexData = () => {
     masterNodePromise,
     sidecarPromise,
     explorerPromise,
+    stacksChainTipPromise,
     lastStacksChainTipHeightPromise,
     lastStacksChainTipHeightTimePromise,
     lastChainReset,
@@ -164,6 +174,7 @@ const getIndexData = () => {
       masterNodePings,
       sidecarPings,
       explorerPings,
+      stacksChainTipHistorical,
       lastStacksChainTipHeight,
       lastStacksChainTipHeightTime,
       lastChainReset,
@@ -184,11 +195,60 @@ const getIndexData = () => {
     ]) => {
       const minutesSinceLastStacksBlock = moment.duration(moment().diff(moment.unix(lastStacksChainTipHeightTime))).asMinutes();
       const blockProgressStatus = minutesSinceLastStacksBlock > 30 ? 2 : minutesSinceLastStacksBlock > 10 ? 1 : 0
+      var averageBlockRate = 0;
+      var showLastHourAverage = false;
+      var lastHourAverageBlockRate = 0;
+      var blockRateDuration = 0; 
+      const blockRateUnits = 'blocks/hr';
+      var blockRateStatus = 0;
+      var lastHourBlockRateStatus = 0;
+
+      if (stacksChainTipHistorical && stacksChainTipHistorical.length > 1) {
+        const latestBlockTimestamp = stacksChainTipHistorical[0].timestamp;
+        const latestBlockHeight = stacksChainTipHistorical[0].value;
+        const oldestBlockTimestamp = stacksChainTipHistorical[stacksChainTipHistorical.length - 1].timestamp;
+        const oldestBlockHeight = stacksChainTipHistorical[stacksChainTipHistorical.length - 1].value;
+        const duration = moment.duration(moment.unix(latestBlockTimestamp).diff(moment.unix(oldestBlockTimestamp)));
+        const heightDifference = latestBlockHeight - oldestBlockHeight;
+
+        if (heightDifference > 0 && duration > 0) {
+          averageBlockRate = heightDifference / duration.asHours();
+          blockRateDuration = duration.asHours();
+          if (averageBlockRate < 30) {
+            blockRateStatus = 2;
+          } else if (averageBlockRate < 85) {
+            blockRateStatus = 1;
+          }
+
+          // extra hacky 1 hour block rate based on default node-cron schedule (6 data points)
+          if (stacksChainTipHistorical.length > 6) {
+            showLastHourAverage = true;
+            const approxOneHourAgoBlockHeight = stacksChainTipHistorical[5].value;
+            const approxOneHourAgoTimestamp = stacksChainTipHistorical[5].timestamp;
+            const approxOneHourHeightDifference = latestBlockHeight - approxOneHourAgoBlockHeight;
+            const approxOneHourDuration = moment.duration(moment.unix(latestBlockTimestamp).diff(moment.unix(approxOneHourAgoTimestamp)));
+            lastHourAverageBlockRate = approxOneHourHeightDifference / approxOneHourDuration.asHours();
+            if (lastHourAverageBlockRate < 30) {
+              lastHourBlockRateStatus = 2;
+            } else if (averageBlockRate < 85) {
+              lastHourBlockRateStatus = 1;
+            }
+          }
+        }
+      }
 
       return {
         masterNodePings,
         sidecarPings,
         explorerPings,
+        stacksChainTipHistorical,
+        averageBlockRate,
+        blockRateDuration,
+        blockRateUnits,
+        blockRateStatus,
+        showLastHourAverage,
+        lastHourAverageBlockRate,
+        lastHourBlockRateStatus,
         lastStacksChainTipHeight,
         lastStacksChainTipHeightTime,
         blockProgressStatus,

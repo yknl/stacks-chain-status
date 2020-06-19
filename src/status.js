@@ -3,8 +3,6 @@ const AbortController = require('abort-controller');
 const moment = require('moment');
 const { promisify } = require('util');
 
-const historicalDataMax = 72;
-
 const { 
   pingTimeout,
   nodeInfoURL,
@@ -14,6 +12,7 @@ const {
   masterNodeKey,
   sidecarKey,
   explorerKey,
+  stacksChainTipKey,
   lastStacksChainTipHeightKey,
   lastStacksChainTipHeightTimeKey,
   lastChainResetKey,
@@ -27,6 +26,7 @@ const {
   seededTokenTransferTxStatusKey,
   seededContractDeployTxStatusKey,
   seededContractCallTxStatusKey,
+  historicalDataMax,
 } = require('./constants')
 
 function getAndUpdateStatus(url, redisKey, redisClient, data, json = false) {
@@ -83,12 +83,16 @@ function getStatus(url, json) {
     });
 }
 
-function updateHistorical(redisClient, key, data, status) {
-  const pingResult = { timestamp: moment().unix(), status };
+function updateHistorical(redisClient, key, data, value) {
+  const newPoint = { 
+    timestamp: moment().unix(), 
+    value
+  };
+
   if(!data) {
     data = [];
   }
-  data.unshift(pingResult);
+  data.unshift(newPoint);
   if (data.length > historicalDataMax) {
     data = data.slice(0, historicalDataMax);
   }
@@ -228,9 +232,19 @@ module.exports = function status(redisClient) {
       contractDeployTxStatus,
       contractCallTxStatus,
     ]) => {
-
       if (masterNodeResponse) {
         const newStacksChainTipHeight = masterNodeResponse.stacks_tip_height;
+
+        redisGetAsync(stacksChainTipKey).then((value) => {
+          if (value) {
+            return JSON.parse(value);
+          } else {
+            return null;
+          }
+        }).then((data) => {
+          return updateHistorical(redisClient, stacksChainTipKey, data, newStacksChainTipHeight);
+        });
+
         if (newStacksChainTipHeight != lastStacksChainTipHeight) {
           if (newStacksChainTipHeight < parseInt(lastStacksChainTipHeight)) {
             if (masterNodeResponse) {

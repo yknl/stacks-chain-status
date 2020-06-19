@@ -95,7 +95,7 @@ html(lang="en")
       if(!data.masterNodePings) 
         span.yellow Checking status...
       else 
-        if(data.masterNodePings[0].status === 1) 
+        if(data.masterNodePings[0].value === 1) 
           span.green Online
         else 
           span.red Offline
@@ -104,7 +104,7 @@ html(lang="en")
         div.medium.historical
           div
             for ping in data.masterNodePings
-              if(ping.status === 1)
+              if(ping.value === 1)
                 div.historical-ok.tooltip I
                   span.tooltiptext #{formatTimestamp(ping.timestamp)}
               else
@@ -117,7 +117,7 @@ html(lang="en")
       if(!data.sidecarPings) 
         span.yellow Checking status...
       else 
-        if(data.sidecarPings[0].status === 1) 
+        if(data.sidecarPings[0].value === 1) 
           span.green Online
         else 
           span.red Offline
@@ -126,7 +126,7 @@ html(lang="en")
         div.medium.historical
           div
             for ping in data.sidecarPings
-              if(ping.status === 1)
+              if(ping.value === 1)
                 div.historical-ok.tooltip I
                   span.tooltiptext #{formatTimestamp(ping.timestamp)}
               else
@@ -139,7 +139,7 @@ html(lang="en")
       if(!data.explorerPings) 
         span.yellow Checking status...
       else 
-        if(data.explorerPings[0].status === 1) 
+        if(data.explorerPings[0].value === 1) 
           span.green Online
         else 
           span.red Offline
@@ -148,7 +148,7 @@ html(lang="en")
         div.medium.historical
           div
             for ping in data.explorerPings
-              if(ping.status === 1)
+              if(ping.value === 1)
                 div.historical-ok.tooltip I
                   span.tooltiptext #{formatTimestamp(ping.timestamp)}
               else
@@ -170,6 +170,32 @@ html(lang="en")
       div.small.yellow #{fromNow(data.lastStacksChainTipHeightTime)}
     else
       div.small.green #{fromNow(data.lastStacksChainTipHeightTime)}
+
+    div.large Average block rate:
+      div
+        if (data.showLastHourAverage)
+          if(data.lastHourBlockRateStatus === 2)
+            span.red ~#{data.lastHourAverageBlockRate.toFixed(0)} #{data.blockRateUnits} 
+            span in the last hour
+          else if (data.lastHourBlockRateStatus === 1)
+            span.yellow ~#{data.lastHourAverageBlockRate.toFixed(0)} #{data.blockRateUnits} 
+            span in the last hour
+          else 
+            span.green ~#{data.lastHourAverageBlockRate.toFixed(0)} #{data.blockRateUnits} 
+            span in the last hour
+      div
+        if (data.averageBlockRate)
+          if(data.blockRateStatus === 2)
+            span.red ~#{data.averageBlockRate.toFixed(0)} #{data.blockRateUnits} 
+            span in the last #{data.blockRateDuration.toFixed(1)} hr
+          else if (data.blockRateStatus === 1)
+            span.yellow ~#{data.averageBlockRate.toFixed(0)} #{data.blockRateUnits} 
+            span in the last #{data.blockRateDuration.toFixed(1)} hr
+          else 
+            span.green ~#{data.averageBlockRate.toFixed(0)} #{data.blockRateUnits} 
+            span in the last #{data.blockRateDuration.toFixed(1)} hr
+        else 
+          span calculating...
     div.large Last Chain Reset: 
       if (data.lastChainReset)
         span #{fromNow(data.lastChainReset)}

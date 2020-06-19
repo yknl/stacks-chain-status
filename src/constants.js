@@ -9,6 +9,7 @@ module.exports = {
   masterNodeKey: 'master_node_ping',
   sidecarKey: 'sidecar_ping',
   explorerKey: 'explorer_ping',
+  stacksChainTipKey: 'stacks_chain_tip',
   lastStacksChainTipHeightKey: 'last_stacks_chain_tip_height',
   lastStacksChainTipHeightTimeKey: 'last_stacks_chain_tip_height_time',
   lastBurnBlockHeightKey: 'last_burn_block_height',
@@ -41,4 +42,5 @@ module.exports = {
   seededTokenTransferTxBroadcastTimeKey: 'seeded_token_transfer_tx_broadcast_time',
   seededContractDeployTxBroadcastTimeKey: 'seeded_contract_deploy_tx_broadcast_time',
   seededContractCallTxBroadcastTimeKey: 'seeded_contract_call_tx_broadcast_time',
+  historicalDataMax: 72
 }
