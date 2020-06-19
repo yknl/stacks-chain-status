@@ -1,6 +1,6 @@
 module.exports = {
   pingTimeout: 5000,
-  nodeInfoURL: 'http://testnet-master.blockstack.org:20443/v2/infoa',
+  nodeInfoURL: 'http://testnet-master.blockstack.org:20443/v2/info',
   neonNodeInfoURL: 'http://neon.blockstack.org/v2/info',
   sidecarURL: 'https://sidecar.staging.blockstack.xyz/sidecar/v1/status',
   sidecarTxURL: 'https://sidecar.staging.blockstack.xyz/sidecar/v1/tx',
