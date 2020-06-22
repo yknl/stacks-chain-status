@@ -240,8 +240,8 @@ const getIndexData = () => {
             } else {
               lastHourBlockRateStatus = 0;
             }
-          }
-        } else if (stacksChainTipHistorical.length === 0) {
+          } 
+        } else if (stacksChainTipHistorical.length === 0 || heightDifference < 0) {
           calculatingBlockRate = true;
         }
       }
