@@ -235,30 +235,29 @@ module.exports = function status(redisClient) {
       if (masterNodeResponse) {
         const newStacksChainTipHeight = masterNodeResponse.stacks_tip_height;
 
-        redisGetAsync(stacksChainTipKey).then((value) => {
-          if (value) {
-            return JSON.parse(value);
-          } else {
-            return null;
-          }
-        }).then((data) => {
-          return updateHistorical(redisClient, stacksChainTipKey, data, newStacksChainTipHeight);
-        });
-
-        if (newStacksChainTipHeight != lastStacksChainTipHeight) {
-          if (newStacksChainTipHeight < parseInt(lastStacksChainTipHeight)) {
-            if (masterNodeResponse) {
-              redisClient.set(reseedingStepKey, ReseedingSteps.Setup.toString());
-              redisClient.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
-              redisClient.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
-              redisClient.set(lastChainResetKey, moment().unix().toString());
-            }
-          } else {
-            redisClient.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
-            redisClient.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
-          }
-
+        if (newStacksChainTipHeight < parseInt(lastStacksChainTipHeight)) {
+          redisClient.set(reseedingStepKey, ReseedingSteps.Setup.toString());
+          redisClient.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
+          redisClient.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
+          redisClient.set(lastChainResetKey, moment().unix().toString());
+          redisClient.del(stacksChainTipKey);
+        } else {
+          redisClient.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
+          redisClient.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
         }
+
+        if (newStacksChainTipHeight >= parseInt(lastStacksChainTipHeight)) {
+          redisGetAsync(stacksChainTipKey).then((value) => {
+            if (value) {
+              return JSON.parse(value);
+            } else {
+              return null;
+            }
+          }).then((data) => {
+            return updateHistorical(redisClient, stacksChainTipKey, data, newStacksChainTipHeight);
+          });
+        }
+
       } else {
         redisGetAsync(stacksChainTipKey).then((value) => {
           if (value) {
