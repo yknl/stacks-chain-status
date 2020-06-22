@@ -198,12 +198,13 @@ const getIndexData = () => {
       const minutesSinceLastStacksBlock = moment.duration(moment().diff(moment.unix(lastStacksChainTipHeightTime))).asMinutes();
       const blockProgressStatus = minutesSinceLastStacksBlock > 30 ? 2 : minutesSinceLastStacksBlock > 10 ? 1 : 0
       var averageBlockRate = 0;
+      var calculatingBlockRate = false;
       var showLastHourAverage = false;
       var lastHourAverageBlockRate = 0;
       var blockRateDuration = 0; 
       const blockRateUnits = 'blocks/hr';
-      var blockRateStatus = 0;
-      var lastHourBlockRateStatus = 0;
+      var blockRateStatus = 2;
+      var lastHourBlockRateStatus = 2;
 
       if (stacksChainTipHistorical && stacksChainTipHistorical.length > 1) {
         const latestBlockTimestamp = stacksChainTipHistorical[0].timestamp;
@@ -212,14 +213,16 @@ const getIndexData = () => {
         const oldestBlockHeight = stacksChainTipHistorical[stacksChainTipHistorical.length - 1].value;
         const duration = moment.duration(moment.unix(latestBlockTimestamp).diff(moment.unix(oldestBlockTimestamp)));
         const heightDifference = latestBlockHeight - oldestBlockHeight;
+        blockRateDuration = duration.asHours();
 
-        if (heightDifference > 0 && duration > 0) {
-          averageBlockRate = heightDifference / duration.asHours();
-          blockRateDuration = duration.asHours();
+        if (heightDifference > 0 && blockRateDuration > 0) {
+          averageBlockRate = heightDifference / blockRateDuration;
           if (averageBlockRate < blockRateRedCount) {
             blockRateStatus = 2;
           } else if (averageBlockRate < blockRateYellowCount) {
             blockRateStatus = 1;
+          } else {
+            blockRateStatus = 0;
           }
 
           // extra hacky 1 hour block rate based on default node-cron schedule (6 data points)
@@ -234,8 +237,12 @@ const getIndexData = () => {
               lastHourBlockRateStatus = 2;
             } else if (averageBlockRate < blockRateYellowCount) {
               lastHourBlockRateStatus = 1;
+            } else {
+              lastHourBlockRateStatus = 0;
             }
           }
+        } else if (stacksChainTipHistorical.length === 0) {
+          calculatingBlockRate = true;
         }
       }
 
@@ -244,6 +251,7 @@ const getIndexData = () => {
         sidecarPings,
         explorerPings,
         stacksChainTipHistorical,
+        calculatingBlockRate,
         averageBlockRate,
         blockRateDuration,
         blockRateUnits,

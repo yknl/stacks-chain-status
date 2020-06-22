@@ -184,7 +184,7 @@ html(lang="en")
             span.green ~#{data.lastHourAverageBlockRate.toFixed(0)} #{data.blockRateUnits} 
             span in the last hour
       div
-        if (data.averageBlockRate)
+        if (!data.calculatingBlockRate)
           if(data.blockRateStatus === 2)
             span.red ~#{data.averageBlockRate.toFixed(0)} #{data.blockRateUnits} 
             span in the last #{data.blockRateDuration.toFixed(1)} hr
