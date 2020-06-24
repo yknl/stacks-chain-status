@@ -157,7 +157,7 @@ html(lang="en")
             div.full 
               div.small Now&nbsp;&nbsp;
               div.small.end #{fromNow(oldestExplorerPing.timestamp)}
-    div.large Last Seen Stacks Chain Tip Height: 
+    div.large Last seen stacks chain tip height: 
       if (data.blockProgressStatus === 2)
         span.red #{data.lastStacksChainTipHeight}
       else if (data.blockProgressStatus === 1)
@@ -187,18 +187,28 @@ html(lang="en")
         if (!data.calculatingBlockRate)
           if(data.blockRateStatus === 2)
             span.red ~#{data.averageBlockRate.toFixed(0)} #{data.blockRateUnits} 
-            span in the last #{data.blockRateDuration.toFixed(1)} hr
+            span in the last #{data.blockRateDuration.toFixed(1)}h
           else if (data.blockRateStatus === 1)
             span.yellow ~#{data.averageBlockRate.toFixed(0)} #{data.blockRateUnits} 
-            span in the last #{data.blockRateDuration.toFixed(1)} hr
+            span in the last #{data.blockRateDuration.toFixed(1)}h
           else 
             span.green ~#{data.averageBlockRate.toFixed(0)} #{data.blockRateUnits} 
-            span in the last #{data.blockRateDuration.toFixed(1)} hr
+            span in the last #{data.blockRateDuration.toFixed(1)}h
         else 
           span calculating...
-    div.large Last Chain Reset: 
+    div.large Last chain reset: 
       if (data.lastChainReset)
         span #{fromNow(data.lastChainReset)}
+      else 
+        span Unknown
+    div.large Exit at block: 
+      if (data.exitAtBlock)
+        span #{data.exitAtBlock}
+      else 
+        span Unknown
+    div.large At current block rate, next chain reset will be in: 
+      if (data.estimatedTimeUntilReset)
+        span #{data.estimatedTimeUntilReset}
       else 
         span Unknown
 

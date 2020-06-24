@@ -14,6 +14,7 @@ const {
   lastStacksChainTipHeightTimeKey,
   lastChainResetKey,
   reseedingStepKey,
+  exitAtBlockKey,
   ReseedingSteps,
   seededFaucetTxKey,
   seededTokenTransferTxKey,
@@ -129,7 +130,8 @@ const getIndexData = () => {
 
   const lastStacksChainTipHeightPromise = redisGetAsync(lastStacksChainTipHeightKey);
   const lastStacksChainTipHeightTimePromise = redisGetAsync(lastStacksChainTipHeightTimeKey);
-  const lastChainReset = redisGetAsync(lastChainResetKey);
+  const lastChainResetPromise = redisGetAsync(lastChainResetKey);
+  const exitAtBlockPromise = redisGetAsync(exitAtBlockKey);
   const seededFaucetTxidPromise = redisGetAsync(seededFaucetTxKey);
   const seededTokenTransferTxidPromise = redisGetAsync(seededTokenTransferTxKey);
   const seededContractDeployTxidPromise = redisGetAsync(seededContractDeployTxKey);
@@ -154,7 +156,8 @@ const getIndexData = () => {
     stacksChainTipPromise,
     lastStacksChainTipHeightPromise,
     lastStacksChainTipHeightTimePromise,
-    lastChainReset,
+    lastChainResetPromise,
+    exitAtBlockPromise,
     seededFaucetTxidPromise,
     seededTokenTransferTxidPromise,
     seededContractDeployTxidPromise,
@@ -180,6 +183,7 @@ const getIndexData = () => {
       lastStacksChainTipHeight,
       lastStacksChainTipHeightTime,
       lastChainReset,
+      exitAtBlock,
       seededFaucetTxid,
       seededTokenTransferTxid,
       seededContractDeployTxid,
@@ -205,6 +209,7 @@ const getIndexData = () => {
       const blockRateUnits = 'blocks/hr';
       var blockRateStatus = 2;
       var lastHourBlockRateStatus = 2;
+      var estimatedTimeUntilReset = false;
 
       if (stacksChainTipHistorical && stacksChainTipHistorical.length > 1) {
         const latestBlockTimestamp = stacksChainTipHistorical[0].timestamp;
@@ -245,6 +250,19 @@ const getIndexData = () => {
           calculatingBlockRate = true;
         }
       }
+      
+      if (averageBlockRate > 0) {
+        const blocksUntilReset = exitAtBlock - lastStacksChainTipHeight;
+        const estimatedHoursUntilReset = blocksUntilReset / averageBlockRate;
+        const estimatedResetDuration = moment.duration({hours: estimatedHoursUntilReset});
+        if (estimatedResetDuration.asDays() > 0) {
+          estimatedTimeUntilReset = `${estimatedResetDuration.days()}d ${estimatedResetDuration.hours()}h ${estimatedResetDuration.minutes()}m`;
+        } else if (estimatedResetDuration.asHours > 0) {
+          estimatedTimeUntilReset = `${estimatedResetDuration.hours()}h ${estimatedResetDuration.minutes()}m`;
+        } else {
+          estimatedTimeUntilReset = `${estimatedResetDuration.minutes()}m`;
+        }
+      }
 
       return {
         masterNodePings,
@@ -263,6 +281,8 @@ const getIndexData = () => {
         lastStacksChainTipHeightTime,
         blockProgressStatus,
         lastChainReset,
+        exitAtBlock,
+        estimatedTimeUntilReset,
         seededFaucetTx: {
           txid: seededFaucetTxid,
           broadcasted: seededFaucetTxTime,

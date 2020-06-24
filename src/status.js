@@ -16,6 +16,7 @@ const {
   lastStacksChainTipHeightKey,
   lastStacksChainTipHeightTimeKey,
   lastChainResetKey,
+  exitAtBlockKey,
   ReseedingSteps,
   reseedingStepKey,
   seededFaucetTxKey,
@@ -234,6 +235,8 @@ module.exports = function status(redisClient) {
     ]) => {
       if (masterNodeResponse) {
         const newStacksChainTipHeight = masterNodeResponse.stacks_tip_height;
+        const exitAtBlock = masterNodeResponse.exit_at_block_height;
+        redisClient.set(exitAtBlockKey, exitAtBlock.toString());
 
         if (newStacksChainTipHeight < parseInt(lastStacksChainTipHeight)) {
           redisClient.set(reseedingStepKey, ReseedingSteps.Setup.toString());

@@ -15,6 +15,7 @@ module.exports = {
   lastBurnBlockHeightKey: 'last_burn_block_height',
   lastBurnBlockHeightTimeKey: 'last_burn_block_height_time',
   lastChainResetKey: 'last_chain_reset',
+  exitAtBlockKey: 'exit_at_block',
   reseedingStepKey: 'reseeding_step',
   reseedNextBlockKey: 'reseed_next_block',
   reseedTryCountKey: 'reseed_try_count',
