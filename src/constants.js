@@ -46,4 +46,5 @@ module.exports = {
   historicalDataMax: 72,
   blockRateYellowCount: 85,
   blockRateRedCount: 30,
+  burnChainBlockRate: 120,
 }

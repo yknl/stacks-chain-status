@@ -12,6 +12,8 @@ const {
   stacksChainTipKey,
   lastStacksChainTipHeightKey,
   lastStacksChainTipHeightTimeKey,
+  lastBurnBlockHeightKey,
+  lastBurnBlockHeightTimeKey,
   lastChainResetKey,
   reseedingStepKey,
   exitAtBlockKey,
@@ -32,6 +34,7 @@ const {
   reseedAbortErrorKey,
   blockRateRedCount,
   blockRateYellowCount,
+  burnChainBlockRate,
 } = require('./constants')
 
 const moment = require('moment');
@@ -130,6 +133,8 @@ const getIndexData = () => {
 
   const lastStacksChainTipHeightPromise = redisGetAsync(lastStacksChainTipHeightKey);
   const lastStacksChainTipHeightTimePromise = redisGetAsync(lastStacksChainTipHeightTimeKey);
+  const lastBurnBlockHeightPromise = redisGetAsync(lastBurnBlockHeightKey);
+  const lastBurnBlockHeightTimePromise = redisGetAsync(lastBurnBlockHeightTimeKey);
   const lastChainResetPromise = redisGetAsync(lastChainResetKey);
   const exitAtBlockPromise = redisGetAsync(exitAtBlockKey);
   const seededFaucetTxidPromise = redisGetAsync(seededFaucetTxKey);
@@ -156,6 +161,7 @@ const getIndexData = () => {
     stacksChainTipPromise,
     lastStacksChainTipHeightPromise,
     lastStacksChainTipHeightTimePromise,
+    lastBurnBlockHeightPromise,
     lastChainResetPromise,
     exitAtBlockPromise,
     seededFaucetTxidPromise,
@@ -182,6 +188,7 @@ const getIndexData = () => {
       stacksChainTipHistorical,
       lastStacksChainTipHeight,
       lastStacksChainTipHeightTime,
+      lastBurnBlockHeight,
       lastChainReset,
       exitAtBlock,
       seededFaucetTxid,
@@ -252,8 +259,8 @@ const getIndexData = () => {
       }
       
       if (averageBlockRate > 0) {
-        const blocksUntilReset = exitAtBlock - lastStacksChainTipHeight;
-        const estimatedHoursUntilReset = blocksUntilReset / averageBlockRate;
+        const blocksUntilReset = exitAtBlock - lastBurnBlockHeight;
+        const estimatedHoursUntilReset = blocksUntilReset / burnChainBlockRate;
         const estimatedResetDuration = moment.duration({hours: estimatedHoursUntilReset});
         if (estimatedResetDuration.asDays() > 0) {
           estimatedTimeUntilReset = `${estimatedResetDuration.days()}d ${estimatedResetDuration.hours()}h ${estimatedResetDuration.minutes()}m`;
@@ -279,6 +286,7 @@ const getIndexData = () => {
         lastHourBlockRateStatus,
         lastStacksChainTipHeight,
         lastStacksChainTipHeightTime,
+        lastBurnBlockHeight,
         blockProgressStatus,
         lastChainReset,
         exitAtBlock,

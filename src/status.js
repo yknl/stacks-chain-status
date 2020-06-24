@@ -15,6 +15,8 @@ const {
   stacksChainTipKey,
   lastStacksChainTipHeightKey,
   lastStacksChainTipHeightTimeKey,
+  lastBurnBlockHeightKey,
+  lastBurnBlockHeightTimeKey,
   lastChainResetKey,
   exitAtBlockKey,
   ReseedingSteps,
@@ -237,7 +239,10 @@ module.exports = function status(redisClient) {
         const newStacksChainTipHeight = masterNodeResponse.stacks_tip_height;
         const exitAtBlock = masterNodeResponse.exit_at_block_height;
         redisClient.set(exitAtBlockKey, exitAtBlock.toString());
-
+        const burnBlockHeight = masterNodeResponse.burn_block_height;
+        redisClient.set(lastBurnBlockHeightKey, burnBlockHeight.toString());
+        redisClient.set(lastBurnBlockHeightTimeKey, moment().unix().toString());
+        
         if (newStacksChainTipHeight < parseInt(lastStacksChainTipHeight)) {
           redisClient.set(reseedingStepKey, ReseedingSteps.Setup.toString());
           redisClient.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);

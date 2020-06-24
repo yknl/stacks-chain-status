@@ -201,12 +201,14 @@ html(lang="en")
         span #{fromNow(data.lastChainReset)}
       else 
         span Unknown
+    div.large Last seen burn chain block height: 
+      span #{data.lastBurnBlockHeight}
     div.large Exit at block: 
       if (data.exitAtBlock)
         span #{data.exitAtBlock}
       else 
         span Unknown
-    div.large At current block rate, next chain reset will be in: 
+    div.large Estimated time until next chain reset: 
       if (data.estimatedTimeUntilReset)
         span #{data.estimatedTimeUntilReset}
       else 
