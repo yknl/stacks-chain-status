@@ -1,6 +1,6 @@
 {
   "name": "stacks-chain-status",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Stacks Chain Status",
   "main": "src/index.js",
   "scripts": {
