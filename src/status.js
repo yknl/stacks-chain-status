@@ -251,6 +251,9 @@ module.exports = function status(redisClient) {
           redisClient.del(stacksChainTipKey);
         } else {
           redisClient.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
+        }
+
+        if (newStacksChainTipHeight > parseInt(lastStacksChainTipHeight)) {
           redisClient.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
         }
 
