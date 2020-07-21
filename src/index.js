@@ -1,8 +1,9 @@
 const dotenv = require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const { promisify } = require('util');
 
 const { 
@@ -46,11 +47,19 @@ app.locals.fromNow = (timestamp) =>
 app.locals.getExplorerTxURL = (txid) => 
   `${explorerURL}/txid/0x${txid}`;
 
-const redisHost = process.env.REDIS_HOST || '127.0.0.1';
-const redisPort = process.env.REDIS_PORT || '6379';
-
 const redis = require("redis");
-const client = redis.createClient({host: redisHost, port: redisPort});
+let clientConfig = {};
+
+if (process.env.NODE_ENV === "production") {
+  clientConfig = { url: process.env.REDIS_URL };
+} else {
+  clientConfig = {
+    host: process.env.REDIS_HOST || "127.0.0.1",
+    port: process.env.REDIS_PORT || "6379",
+  };
+}
+
+const client = redis.createClient(clientConfig);
 
 const redisGetAsync = promisify(client.get).bind(client);
 
@@ -317,6 +326,9 @@ const getIndexData = () => {
     })
 }
 
+// enable cors
+app.use(cors());
+
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 app.get('/', (req, res) => {
@@ -326,7 +338,7 @@ app.get('/', (req, res) => {
 });
 app.get('/json', (req, res) => {
   getIndexData().then(data => {
-    return res.send(data);
+    return res.json(data);
   })
 });
 
