@@ -47,3 +47,5 @@ docs
 .vscode/
 
 .env
+
+dump.rdb
