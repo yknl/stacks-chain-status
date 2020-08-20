@@ -44,7 +44,7 @@ module.exports = {
   seededContractDeployTxBroadcastTimeKey: 'seeded_contract_deploy_tx_broadcast_time',
   seededContractCallTxBroadcastTimeKey: 'seeded_contract_call_tx_broadcast_time',
   historicalDataMax: 72,
-  blockRateYellowCount: 85,
-  blockRateRedCount: 30,
-  burnChainBlockRate: 120,
+  blockRateYellowCount: 18,
+  blockRateRedCount: 5,
+  burnChainBlockRate: 30,
 }
