@@ -244,7 +244,7 @@ module.exports = function status(redisClient) {
         redisClient.set(lastBurnBlockHeightTimeKey, moment().unix().toString());
         
         if (newStacksChainTipHeight < parseInt(lastStacksChainTipHeight) 
-          || (parseInt(lastStacksChainTipHeight) === 0) && newStacksChainTipHeight > 0) {
+          || (parseInt(lastStacksChainTipHeight) === 0 && newStacksChainTipHeight > 0)) {
           redisClient.set(reseedingStepKey, ReseedingSteps.Setup.toString());
           redisClient.set(lastStacksChainTipHeightKey, newStacksChainTipHeight);
           redisClient.set(lastStacksChainTipHeightTimeKey, moment().unix().toString());
