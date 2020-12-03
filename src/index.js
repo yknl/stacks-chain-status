@@ -267,7 +267,7 @@ const getIndexData = () => {
         }
       }
       
-      if (averageBlockRate > 0) {
+      if (averageBlockRate > 0 && exitAtBlock) {
         const blocksUntilReset = exitAtBlock - lastBurnBlockHeight;
         const estimatedHoursUntilReset = blocksUntilReset / burnChainBlockRate;
         const estimatedResetDuration = moment.duration({hours: estimatedHoursUntilReset});
@@ -278,6 +278,8 @@ const getIndexData = () => {
         } else {
           estimatedTimeUntilReset = `${estimatedResetDuration.minutes()}m`;
         }
+      } else {
+        estimatedTimeUntilReset = 'N/A';
       }
 
       return {
